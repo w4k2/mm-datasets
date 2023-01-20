@@ -2,5 +2,7 @@
 .DS_store
 __pycache__/
 utils/__pycache__/
-extracted/kinetics400/*.npy
-extracted/mmIMDb/*.npy
+data_extracted/kinetics400/*.npy
+data_extracted/mmIMDb/*.npy
+data_npy/kinetics400/*.npy
+data_npy/mmIMDb/*.npy

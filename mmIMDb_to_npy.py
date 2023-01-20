@@ -1,17 +1,23 @@
+"""
+Whole mmIMDb dataset to npy.
+"""
+
 import os
 from pathlib import Path
 from tqdm import tqdm
 import json
 import matplotlib.pyplot as plt
 import numpy as np
-from cv2 import resize
+from torchvision.models import ResNet18_Weights
+from torch import from_numpy
+
 
 data_path = "/Volumes/T7/Multimodal/mmIMDb/"
 files = os.listdir(data_path)
 files = list(set([file.split(".")[0] for file in files]))
 files.sort()
 
-all_genres = np.load("extracted/mmIMDb_genres.npy")
+all_genres = np.load("data_npy/mmIMDb_genres.npy")
 print(all_genres)
 
 mmIMDb_img = []
@@ -30,8 +36,8 @@ for file in tqdm(files):
             txt = ' '.join(str(text) for text in json_data["plot"])
             
             # ENCODED y
-            # encoded_movie_genres = [1 if movie_genre in movie_genres else 0 for movie_genre in all_genres[:, 0]]
-            # mmIMDb_y.append(encoded_movie_genres)
+            encoded_movie_genres = [1 if movie_genre in movie_genres else 0 for movie_genre in all_genres[:, 0]]
+            mmIMDb_y.append(encoded_movie_genres)
             
             # IMG
             img = plt.imread(jpeg_path)
@@ -39,17 +45,19 @@ for file in tqdm(files):
                 img = np.stack((img, img, img), axis=2)
             if img.shape[2] == 4:
                 img = img[:, :, :3]
-            img = resize(img, (224, 224))
+            resnet18_weights = ResNet18_Weights.IMAGENET1K_V1
+            resnet18_transforms = resnet18_weights.transforms()
+            img = np.swapaxes(resnet18_transforms(from_numpy(np.swapaxes(np.array(img), 0, 2))).numpy(), 0, 2)
             mmIMDb_img.append(img)
             
             # TXT
-            # mmIMDb_txt.append(txt)
+            mmIMDb_txt.append(txt)
             
         except:
             # NO KEYS
             print("NO KEYS!")
             pass
-        
-np.save("extracted/mmIMDb/mmIMDb_img", np.array(mmIMDb_img))
-# np.save("extracted/mmIMDb/mmIMDb_txt", np.array(mmIMDb_txt))
-# np.save("extracted/mmIMDb/mmIMDb_y", np.array(mmIMDb_y))
+
+np.save("data_npy/mmIMDb/mmIMDb_img", np.array(mmIMDb_img))
+np.save("data_npy/mmIMDb/mmIMDb_txt", np.array(mmIMDb_txt))
+np.save("data_npy/mmIMDb/mmIMDb_y", np.array(mmIMDb_y))
