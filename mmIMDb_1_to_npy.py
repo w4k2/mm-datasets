@@ -1,5 +1,5 @@
 """
-Whole mmIMDb dataset to npy.
+Whole mmIMDb dataset to npy + Resnet18 transforms.
 """
 
 import os

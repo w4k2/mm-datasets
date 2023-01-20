@@ -1,5 +1,6 @@
 """
 Using deep extractors to extract features from each predefined dataset.
+Douczac ekstraktory
 """
 
 import numpy as np

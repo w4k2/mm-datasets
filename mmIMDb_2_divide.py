@@ -1,5 +1,6 @@
 """
 Divide mmIDBd dataset into multiple subsets based on npy format.
+Podzielic na finetuining i test
 """
 
 import numpy as np
