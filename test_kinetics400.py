@@ -27,13 +27,11 @@ for dataset_id, dataset in enumerate(dataset_names):
     print(X_video.shape)
     print(X_audio.shape)
     print(y.shape)
-    print(np.unique(y, return_counts=True))
     print(ids.shape)
-    # exit()
     
-    for task in range(1200, 1250):
+    for task in range(10):
         fig, ax = plt.subplots(2, 1, figsize=(20, 10))
-        ax[0].imshow(X_video[task])
+        ax[0].imshow(X_video[task].astype(np.uint8))
         ax[1].imshow(X_audio[task])
         ax[0].set_title(datasets[0][y[task]], fontsize=20)
     
@@ -41,5 +39,4 @@ for dataset_id, dataset in enumerate(dataset_names):
         plt.savefig("foo.png")
         sleep(.2)
         plt.close()
-        exit()
-    
+    exit()

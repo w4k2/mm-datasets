@@ -1,6 +1,6 @@
 """
 Using deep extractors to extract features from each predefined dataset.
-Douczac ekstraktory
+Do zrobienia
 """
 
 import numpy as np
@@ -48,7 +48,7 @@ for dataset_id, dataset in tqdm(enumerate(datasets)):
         weights = ResNet18_Weights.IMAGENET1K_V1
         preprocess = weights.transforms()
         X_img_batch_transformed = preprocess(from_numpy(np.moveaxis(X_img_batch, 3, 1)))
-
+        # X_img_batch_transformed = from_numpy(np.moveaxis(X_img_batch, 3, 1))
         # extractor model
         model = resnet18(weights=weights)
         model.eval()
@@ -59,7 +59,8 @@ for dataset_id, dataset in tqdm(enumerate(datasets)):
             'flatten': 'extracted_flatten',
         }
         extractor = create_feature_extractor(model, return_nodes=return_nodes)
-        X_img_batch_extracted = extractor(X_img_batch_transformed)["extracted_flatten"].detach().numpy()
+        X_img_batch_extracted = extractor(X_img_batch)["extracted_flatten"].detach().numpy()
+        exit()
         batch_extracted.append(X_img_batch_extracted)
         current_sample += X_img_batch.shape[0]
         # print("CURRENT SAMPLE: %i" % current_sample)

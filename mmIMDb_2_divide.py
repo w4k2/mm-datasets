@@ -1,6 +1,6 @@
 """
 Divide mmIDBd dataset into multiple subsets based on npy format & plot stacked bar chart.
-Podzielic na finetuining i test
+Do zrobienia
 """
 
 import numpy as np

@@ -40,7 +40,6 @@ datasets = [
     
     # ['clay_pottery_making', 'making_a_cake', 'making_a_sandwich', 'making_bed', 'making_jewelry', 'making_pizza', 'making_snowman', 'making_sushi', 'making_tea'],
 ]
-# dataset_names = ["sport", "instruments", "making", "riding", "dancing", "eating"]
 dataset_names = ["sport", "instruments", "riding", "dancing", "eating"]
 # print("\n")
 # How many instances
@@ -100,7 +99,7 @@ for dataset_id, dataset in enumerate(datasets):
                     extracted = np.mean(all_frames, axis=2)
                     mask = create_circular_mask(extracted.shape[0], extracted.shape[1], radius=int(extracted.shape[0]/4))
                     extracted[mask==False] = 1
-                    resnet_fourier = np.stack((np.abs(extracted), np.abs(extracted), np.abs(extracted)), axis=2).astype(np.uint8)
+                    resnet_fourier = np.stack((np.abs(extracted), np.abs(extracted), np.abs(extracted)), axis=2)
                     X_video.append(resnet_fourier)
                     
                     # Audio
