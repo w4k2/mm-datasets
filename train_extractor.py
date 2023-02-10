@@ -14,7 +14,7 @@ import torch
 
 X_video = np.load("data_npy/kinetics400/kinetics400_video_sport.npy")
 X_audio = np.load("data_npy/kinetics400/kinetics400_audio_sport.npy")
-# X_video = X_audio
+X_video = X_audio
 y = np.load("data_npy/kinetics400/kinetics400_y_sport.npy")
 print(X_video.shape)
 print(X_audio.shape)

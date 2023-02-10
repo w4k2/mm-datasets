@@ -23,7 +23,10 @@ datasets = [
     ["Crime", "Documentary", "Fantasy", "Sci-Fi"],
     ["Animation", "Biography", "History", "Music", "War"],
     ["Film-Noir", "Musical", "News", "Short", "Sport", "Western"],
-    all_genres,
+    ['Action', 'Adventure', 'Comedy', 'Crime',
+    'Documentary', 'Drama', 'Family', 'Fantasy', 'Horror',
+    'Music', 'Musical', 'Mystery', 'Romance', 'Sci-Fi',
+    'Short', 'Thriller', 'Western'],
 ]
 
 for dataset_id, dataset in enumerate(datasets):
@@ -51,7 +54,7 @@ for dataset_id, dataset in enumerate(datasets):
     
     np.save("data_npy/mmIMDb/mmIMDb_%s_img" % dataset_name, np.array(dataset_X_img))
     np.save("data_npy/mmIMDb/mmIMDb_%s_txt" % dataset_name, np.array(dataset_X_txt))
-    np.save("data_npy/mmIMDb/mmIMDb_%s_y" % dataset_name, np.array(dataset_y))
+    np.save("data_npy/mmIMDb/mmIMDb_%s_y" % dataset_name, np.array(label_encoded_dataset_y))
     
     # Stacked bar plot
     fig, ax = plt.subplots(1, 1, figsize=(25, 10))

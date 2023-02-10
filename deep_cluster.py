@@ -14,6 +14,8 @@ import torch
 from utils import kMeans
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import Normalizer
+from itertools import permutations
+from scipy.stats import mode
 
 
 class IndicesDataset(Dataset):
@@ -37,13 +39,18 @@ print(X_video.shape)
 print(X_audio.shape)
 print(y.shape)
 
+# print(np.unique(y))
+# perms = [np.array(i) for i in permutations(np.unique(y)[:3])]
+# print(perms)
+# exit()
+
 X_train, X_test, y_train, y_test = train_test_split(
     X_video, y, test_size=.8, random_state=1410, stratify=y, shuffle=True)
 
 # Model
 num_classes = np.unique(y).shape[0]
 batch_size = 8
-num_epochs = 10
+num_epochs = 1
 weights = ResNet18_Weights.IMAGENET1K_V1
 # weights = None
 
@@ -64,6 +71,7 @@ data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 model.train()
 print("TRAINING!")
 all_loss = np.zeros(num_epochs)
+kmeans = kMeans(n_clusters=num_classes, p=2)
 for epoch in tqdm(range(num_epochs)):
     epoch_loss = 0
     
@@ -75,12 +83,13 @@ for epoch in tqdm(range(num_epochs)):
     extractor = create_feature_extractor(model, return_nodes=return_nodes)
     print("Epoch extraction!")
     X_train_extracted = extractor(from_numpy(np.moveaxis(X_train, 3, 1)).float().to(device))["extracted_flatten"].cpu().detach().numpy()
-    kmeans = kMeans(n_clusters=num_classes, p=2)
-    pca = PCA(256)
-    X_train_extracted = pca.fit_transform(X_train_extracted)
-    normalizer = Normalizer(norm="l2")
-    X_train_extracted = normalizer.fit_transform(X_train_extracted)
-    print("Epoch clustering!")
+    
+    pca = PCA(2)
+    X_train_extracted_pca = pca.fit_transform(X_train_extracted)
+    # normalizer = Normalizer(norm="l2")
+    # X_train_extracted = normalizer.fit_transform(X_train_extracted)
+    # print("Epoch clustering!")
+    
     cluster_labels = kmeans.fit_predict(X_train_extracted)
     model.train()
     for i, batch in enumerate(data_loader, 0):
@@ -98,12 +107,15 @@ for epoch in tqdm(range(num_epochs)):
         optimizer.step()
         
     all_loss[epoch] = epoch_loss / (i+1)
-    fig, ax = plt.subplots(1, 1, figsize = (20, 10))
-    ax.plot([i for i in range(1, num_epochs+1)][:epoch+1], all_loss[:epoch+1], c = "dodgerblue")
-    ax.set_xlim(1, num_epochs)
+    fig, ax = plt.subplots(2, 1, figsize = (20, 20))
+    ax[0].plot([i for i in range(1, num_epochs+1)][:epoch+1], all_loss[:epoch+1], c = "dodgerblue")
+    ax[0].set_xlim(1, num_epochs)
+    ax[1].scatter(X_train_extracted_pca[:, 0], X_train_extracted_pca[:, 1], c=cluster_labels)
+    # ax[1].scatter(pca.transform(kmeans.centroids_)[:, 0], pca.transform(kmeans.centroids_)[:, 1], c="red", lw = 5)
     plt.tight_layout()
     plt.savefig("foo.png")
     plt.close()
+    # exit()
 
 X_test = from_numpy(np.moveaxis(X_test, 3, 1)).float()
 model.eval()
@@ -127,6 +139,15 @@ while current_sample < X_test.shape[0]:
     # print(score)
     
 all_preds = [item for sublist in all_preds for item in sublist]
+
+encoded_classes = []
+for cluster in range(num_classes):
+    cluster_samples = np.argwhere(cluster_labels == cluster)
+    new_class = mode(y_test[cluster_samples])
+    encoded_classes.append(new_class)
+    print(cluster)
+    print(new_class)
+exit()
 all_preds = np.array(all_preds)
 # print(all_preds)
 score =  balanced_accuracy_score(y_test, all_preds)
