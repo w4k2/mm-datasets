@@ -41,7 +41,11 @@ for dataset_id, dataset in enumerate(dataset_names):
 
         params_to_update = model.parameters()
         optimizer = optim.SGD(params_to_update, lr=0.001, momentum=0.9)
-        criterion = nn.CrossEntropyLoss()
+        _, counts = np.unique(y_train, return_counts=True)
+        weights = from_numpy(np.array([1-(count/np.sum(counts)) for count in counts])).float().to(device)
+        print(weights)
+        # criterion = nn.CrossEntropyLoss()
+        criterion = nn.CrossEntropyLoss(weight = weights)
 
         dataset_ready = TensorDataset(from_numpy(np.moveaxis(X_train, 3, 1)).float(), from_numpy(y_train).long())
         data_loader = DataLoader(dataset_ready, batch_size=batch_size, shuffle=True)
@@ -96,8 +100,8 @@ for dataset_id, dataset in enumerate(dataset_names):
             
         all_extracted = np.vstack(tuple(all_extracted))
         
-        np.save("data_extracted/kinetics400/kinetics400_%s_%s" % (modality, dataset_names[dataset_id]), all_extracted)
-    np.save("data_extracted/kinetics400/kinetics400_y_%s" % dataset_names[dataset_id], y_extract)
-    np.save("data_extracted/kinetics400/kinetics400_ids_%s" % dataset_names[dataset_id], ids_extract)
+        np.save("data_extracted/kinetics400/weighted_kinetics400_%s_%s" % (modality, dataset_names[dataset_id]), all_extracted)
+    np.save("data_extracted/kinetics400/weighted_kinetics400_y_%s" % dataset_names[dataset_id], y_extract)
+    np.save("data_extracted/kinetics400/weighted_kinetics400_ids_%s" % dataset_names[dataset_id], ids_extract)
         
     print("\n")

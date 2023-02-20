@@ -28,17 +28,19 @@ datasets = [
     ["Crime", "Documentary", "Fantasy", "Sci-Fi"],
     ["Animation", "Biography", "History", "Music", "War"],
     ["Film-Noir", "Musical", "News", "Short", "Sport", "Western"],
-    ['Action', 'Adventure', 'Comedy', 'Crime',
-    'Documentary', 'Drama', 'Family', 'Fantasy', 'Horror',
-    'Music', 'Musical', 'Mystery', 'Romance', 'Sci-Fi',
-    'Short', 'Thriller', 'Western'],
+    ['Action', 'Comedy', 'Crime',
+    'Documentary', 'Drama', 'Horror', 'Mystery', 'Romance', 'Sci-Fi'],
+    # ['Action', 'Adventure', 'Comedy', 'Crime',
+    # 'Documentary', 'Drama', 'Family', 'Fantasy', 'Horror',
+    # 'Music', 'Musical', 'Mystery', 'Romance', 'Sci-Fi',
+    # 'Short', 'Thriller', 'Western'],
 ]
 
 for dataset_id, dataset in tqdm(enumerate(datasets)):
-    if dataset_id == (len(datasets)-1):
-        dataset_name = "all"
-    else:
-        dataset_name = "".join([genre[0] for genre in dataset])
+    # if dataset_id == (len(datasets)-1):
+    #     dataset_name = "all"
+    # else:
+    dataset_name = "".join([genre[0] for genre in dataset])
     print(dataset_name)
     X_img = np.load("data_npy/mmIMDb/mmIMDb_%s_img.npy" % dataset_name)
     X_txt = np.load("data_npy/mmIMDb/mmIMDb_%s_txt.npy" % dataset_name)
@@ -67,7 +69,10 @@ for dataset_id, dataset in tqdm(enumerate(datasets)):
 
     params_to_update = model.parameters()
     optimizer = optim.SGD(params_to_update, lr=0.001, momentum=0.9)
-    criterion = nn.CrossEntropyLoss()
+    _, counts = np.unique(y_train, return_counts=True)
+    weights = from_numpy(np.array([1-(count/np.sum(counts)) for count in counts])).float().to(device)
+    print(weights)
+    criterion = nn.CrossEntropyLoss(weight=weights)
 
     dataset_ready = TensorDataset(from_numpy(np.moveaxis(X_img_train, 3, 1)).float(), from_numpy(y_train).long())
     data_loader = DataLoader(dataset_ready, batch_size=batch_size, shuffle=True)

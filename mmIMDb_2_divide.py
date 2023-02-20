@@ -23,18 +23,20 @@ datasets = [
     ["Crime", "Documentary", "Fantasy", "Sci-Fi"],
     ["Animation", "Biography", "History", "Music", "War"],
     ["Film-Noir", "Musical", "News", "Short", "Sport", "Western"],
-    ['Action', 'Adventure', 'Comedy', 'Crime',
-    'Documentary', 'Drama', 'Family', 'Fantasy', 'Horror',
-    'Music', 'Musical', 'Mystery', 'Romance', 'Sci-Fi',
-    'Short', 'Thriller', 'Western'],
+    ['Action', 'Comedy', 'Crime',
+    'Documentary', 'Drama', 'Horror', 'Mystery', 'Romance', 'Sci-Fi'],
+    # ['Action', 'Adventure', 'Comedy', 'Crime',
+    # 'Documentary', 'Drama', 'Family', 'Fantasy', 'Horror',
+    # 'Music', 'Musical', 'Mystery', 'Romance', 'Sci-Fi',
+    # 'Short', 'Thriller', 'Western'],
 ]
 
 for dataset_id, dataset in enumerate(datasets):
     print("\n", dataset)
-    if dataset_id == (len(datasets)-1):
-        dataset_name = "all"
-    else:
-        dataset_name = "".join([genre[0] for genre in dataset])
+    # if dataset_id == (len(datasets)-1):
+    #     dataset_name = "all"
+    # else:
+    dataset_name = "".join([genre[0] for genre in dataset])
         
     genres_columns = np.array([np.argwhere(all_genres == genre)[0] for genre in dataset]).flatten()
     select = np.sum(y[:, genres_columns], axis=1)
@@ -51,6 +53,7 @@ for dataset_id, dataset in enumerate(datasets):
     print(dataset_X_img.shape)
     print(dataset_X_txt.shape)
     print(label_encoded_dataset_y.shape)
+    print(np.unique(label_encoded_dataset_y, return_counts=True))
     
     np.save("data_npy/mmIMDb/mmIMDb_%s_img" % dataset_name, np.array(dataset_X_img))
     np.save("data_npy/mmIMDb/mmIMDb_%s_txt" % dataset_name, np.array(dataset_X_txt))
