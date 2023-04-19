@@ -19,16 +19,39 @@ print(tabulate(np.array([all_genres, np.sum(y, axis=0)])))
 
 # Select
 datasets = [
-    ["Horror", "Romance"],
-    ["Crime", "Documentary", "Fantasy", "Sci-Fi"],
-    ["Animation", "Biography", "History", "Music", "War"],
-    ["Film-Noir", "Musical", "News", "Short", "Sport", "Western"],
-    ['Action', 'Comedy', 'Crime',
-    'Documentary', 'Drama', 'Horror', 'Mystery', 'Romance', 'Sci-Fi'],
-    # ['Action', 'Adventure', 'Comedy', 'Crime',
-    # 'Documentary', 'Drama', 'Family', 'Fantasy', 'Horror',
-    # 'Music', 'Musical', 'Mystery', 'Romance', 'Sci-Fi',
-    # 'Short', 'Thriller', 'Western'],
+    # Binary
+    # HR
+    # ["Horror", "Romance"],
+    # DS
+    ["Documentary", "Sci-Fi"],
+    # HM
+    ["History", "Music"],
+    # BW
+    ["Biography", "Western"],
+    # AM
+    ["Animation", "Musical"],
+    # FS
+    ["Film-Noir", "Short"],
+    # FW
+    ["Family", "War"],
+    # MS
+    ["Musical", "Sport"],
+    # FM
+    ["Fantasy", "Mystery"],
+    # AT
+    ["Adventure", "Thriller"],
+    # Multiclass
+    # ["Crime", "Documentary", "Fantasy", "Sci-Fi"],
+    # ["Animation", "Biography", "History", "Music", "War"],
+    # ["Film-Noir", "Musical", "News", "Short", "Sport", "Western"],
+    # ['Action', 'Comedy', 'Crime',
+    # 'Documentary', 'Drama', 'Horror', 'Mystery', 'Romance', 'Sci-Fi'],
+    # ["Adventure", "Crime", "Music", "Documentary"],
+    # ["Animation", "Fantasy", "History", "Mystery", "Sport"],
+    # ["Family", "Musical", "Sci-Fi", "War"],
+    # ["Fantasy", "Film-Noir", "Western"],
+    # ["History", "Musical", "Sci-Fi", "War", "Western"],
+    # ["Action", "Biography", "Family", "Horror", "Short", "Sport"]
 ]
 
 for dataset_id, dataset in enumerate(datasets):

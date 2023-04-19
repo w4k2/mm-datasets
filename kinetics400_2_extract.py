@@ -9,9 +9,12 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
+from torchvision.transforms import ToTensor
+from torchvision import transforms
 
 dataset_names = ["sport", "instruments", "riding", "dancing", "eating"]
-modalities = ["video", "audio"]
+# modalities = ["video", "audio"]
+modalities = ["video"]
 
 for dataset_id, dataset in enumerate(dataset_names):
     print(dataset)
@@ -21,11 +24,17 @@ for dataset_id, dataset in enumerate(dataset_names):
         print(modality)
         X = np.load("data_npy/kinetics400/kinetics400_%s_%s.npy" % (modality, dataset))
         
-    
+        if modality == "video":
+            X = X.astype("uint8") / 255.0
+            print("Skalowanie")
+        else:
+            print("Bez skalowania")
+            
         X_train, X_extract, y_train, y_extract, ids_train, ids_extract = train_test_split(
             X, y, ids, test_size=.8, random_state=1410, stratify=y, shuffle=True)
         print(y_extract.shape)
         print(y_extract[:20])
+        
         # Train model
         num_classes = np.unique(y).shape[0]
         batch_size = 8

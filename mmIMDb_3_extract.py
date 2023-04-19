@@ -24,16 +24,39 @@ all_genres = np.load("data_npy/mmIMDb_genres.npy")
 all_genres = all_genres[:, 0]
 
 datasets = [
+    # Binary
+    # HR
     ["Horror", "Romance"],
+    # DS
+    ["Documentary", "Sci-Fi"],
+    # HM
+    ["History", "Music"],
+    # BW
+    ["Biography", "Western"],
+    # AM
+    ["Animation", "Musical"],
+    # FS
+    ["Film-Noir", "Short"],
+    # FW
+    ["Family", "War"],
+    # MS
+    ["Musical", "Sport"],
+    # FM
+    ["Fantasy", "Mystery"],
+    # AT
+    ["Adventure", "Thriller"],
+    # Multiclass
     ["Crime", "Documentary", "Fantasy", "Sci-Fi"],
     ["Animation", "Biography", "History", "Music", "War"],
     ["Film-Noir", "Musical", "News", "Short", "Sport", "Western"],
     ['Action', 'Comedy', 'Crime',
     'Documentary', 'Drama', 'Horror', 'Mystery', 'Romance', 'Sci-Fi'],
-    # ['Action', 'Adventure', 'Comedy', 'Crime',
-    # 'Documentary', 'Drama', 'Family', 'Fantasy', 'Horror',
-    # 'Music', 'Musical', 'Mystery', 'Romance', 'Sci-Fi',
-    # 'Short', 'Thriller', 'Western'],
+    ["Adventure", "Crime", "Music", "Documentary"],
+    ["Animation", "Fantasy", "History", "Mystery", "Sport"],
+    ["Family", "Musical", "Sci-Fi", "War"],
+    ["Fantasy", "Film-Noir", "Western"],
+    ["History", "Musical", "Sci-Fi", "War", "Western"],
+    ["Action", "Biography", "Family", "Horror", "Short", "Sport"]
 ]
 
 for dataset_id, dataset in tqdm(enumerate(datasets)):
@@ -57,7 +80,7 @@ for dataset_id, dataset in tqdm(enumerate(datasets)):
     # Training
     num_classes = np.unique(y).shape[0]
     batch_size = 8
-    num_epochs = 10
+    num_epochs = 30
     weights = ResNet18_Weights.IMAGENET1K_V1
 
     model = resnet18(weights=weights)
@@ -101,7 +124,7 @@ for dataset_id, dataset in tqdm(enumerate(datasets)):
         ax.plot([i for i in range(1, num_epochs+1)][:epoch+1], all_loss[:epoch+1], c = "dodgerblue")
         ax.set_xlim(1, num_epochs)
         plt.tight_layout()
-        plt.savefig("foo.png")
+        plt.savefig("figures/training/%s.png" % dataset_name)
         plt.close()
     
     # Extract
@@ -128,7 +151,7 @@ for dataset_id, dataset in tqdm(enumerate(datasets)):
     all_extracted = np.vstack(tuple(all_extracted))
     print("IMG from %s extracted!" % dataset_name)
     print(all_extracted.shape)
-    np.save("data_extracted/mmIMDb/mmIMDb_%s_img" % dataset_name, all_extracted)
+    np.save("data_extracted/mmIMDb/mmIMDb_%s_img_weighted_30" % dataset_name, all_extracted)
 
     """
     Text to embeddings
