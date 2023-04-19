@@ -4,5 +4,7 @@ __pycache__/
 utils/__pycache__/
 data_extracted/kinetics400/*.npy
 data_extracted/mmIMDb/*.npy
+data_extracted/fakeddit/*.npy
 data_npy/kinetics400/*.npy
 data_npy/mmIMDb/*.npy
+data_npy/fakeddit/*.npy
