@@ -19,125 +19,90 @@ import matplotlib.pyplot as plt
 # Batch size for extraction processing
 batch_size = 2000
 
-# load data
-all_genres = np.load("data_npy/mmIMDb_genres.npy")
-all_genres = all_genres[:, 0]
+X_post = np.load('data_npy/fakeddit/fakeddit_posts.npy', allow_pickle=True)
+y_post = np.load('data_npy/fakeddit/fakeddit_posts_y.npy', allow_pickle=True).astype(int)
+X_comment = np.load('data_npy/fakeddit/fakeddit_comments.npy', allow_pickle=True)
+y_comment = np.load('data_npy/fakeddit/fakeddit_comments_y.npy', allow_pickle=True).astype(int)
 
-datasets = [
-    # Binary
-    # HR
-    ["Horror", "Romance"],
-    # DS
-    ["Documentary", "Sci-Fi"],
-    # HM
-    ["History", "Music"],
-    # BW
-    ["Biography", "Western"],
-    # AM
-    ["Animation", "Musical"],
-    # FS
-    ["Film-Noir", "Short"],
-    # FW
-    ["Family", "War"],
-    # MS
-    ["Musical", "Sport"],
-    # FM
-    ["Fantasy", "Mystery"],
-    # AT
-    ["Adventure", "Thriller"],
-    # Multiclass
-    ["Crime", "Documentary", "Fantasy", "Sci-Fi"],
-    ["Animation", "Biography", "History", "Music", "War"],
-    ["Film-Noir", "Musical", "News", "Short", "Sport", "Western"],
-    ['Action', 'Comedy', 'Crime',
-    'Documentary', 'Drama', 'Horror', 'Mystery', 'Romance', 'Sci-Fi'],
-    ["Adventure", "Crime", "Music", "Documentary"],
-    ["Animation", "Fantasy", "History", "Mystery", "Sport"],
-    ["Family", "Musical", "Sci-Fi", "War"],
-    ["Fantasy", "Film-Noir", "Western"],
-    ["History", "Musical", "Sci-Fi", "War", "Western"],
-    ["Action", "Biography", "Family", "Horror", "Short", "Sport"]
-]
 
-for dataset_id, dataset in tqdm(enumerate(datasets)):
-    # if dataset_id == (len(datasets)-1):
-    #     dataset_name = "all"
-    # else:
-    dataset_name = "".join([genre[0] for genre in dataset])
-    print(dataset_name)
-    X_img = np.load("data_npy/mmIMDb/mmIMDb_%s_img.npy" % dataset_name)
-    X_txt = np.load("data_npy/mmIMDb/mmIMDb_%s_txt.npy" % dataset_name)
-    y = np.load("data_npy/mmIMDb/mmIMDb_%s_y.npy" % dataset_name).astype(int)
-    
-    print(np.unique(y, return_counts=True))
-    X_img_train, X_img_extract, X_txt_train, X_txt_extract, y_train, y_extract = train_test_split(
-            X_img, X_txt, y, test_size=.8, random_state=1410, stratify=y, shuffle=True)
-    
-    """
-    Extraction from images
-    """
-    
-    # Training
-    num_classes = np.unique(y).shape[0]
-    batch_size = 8
-    num_epochs = 30
-    weights = ResNet18_Weights.IMAGENET1K_V1
+"""
+Text to embeddings
+"""
 
-    model = resnet18(weights=weights)
-    num_ftrs = model.fc.in_features
-    model.fc = nn.Linear(num_ftrs, num_classes)
+# Posts
+print("Extracting TXT from posts!")
+print(X_post.shape)
+embedder = SentenceTransformer('all-MiniLM-L6-v2')
+current_sample = 0
+batch_embeddings = []
+print("EXTRACION!")
+while current_sample < X_post.shape[0]:
+    print("Batch %i:%i" % (current_sample, current_sample+batch_size))
+    X_post_batch = X_post[current_sample:current_sample+batch_size]
+    embeddings = embedder.encode(X_post_batch)
+    batch_embeddings.append(embeddings)
+    current_sample += X_post_batch.shape[0]
+    # print("CURRENT SAMPLE: %i" % current_sample)
 
-    device = torch.device("mps")
-    model = model.to(device)
+corpus_embeddings = np.concatenate(batch_embeddings, axis=0)
+print("TXT from posts extracted!")
+print(corpus_embeddings.shape)
+np.save("data_extracted/fakeddit/fakeddit_posts", corpus_embeddings)
 
-    params_to_update = model.parameters()
-    optimizer = optim.SGD(params_to_update, lr=0.001, momentum=0.9)
-    _, counts = np.unique(y_train, return_counts=True)
-    weights = from_numpy(np.array([1-(count/np.sum(counts)) for count in counts])).float().to(device)
-    print(weights)
-    criterion = nn.CrossEntropyLoss(weight=weights)
+print("y from posts extracted!")
+print(y_post.shape)
+np.save("data_extracted/fakeddit/fakeddit_posts_y", y_post)
 
-    dataset_ready = TensorDataset(from_numpy(np.moveaxis(X_img_train, 3, 1)).float(), from_numpy(y_train).long())
-    data_loader = DataLoader(dataset_ready, batch_size=batch_size, shuffle=True)
 
-    model.train()
-    print("TRAINING!")
-    all_loss = np.zeros(num_epochs)
-    for epoch in tqdm(range(num_epochs)):
-        epoch_loss = 0            
-        for i, batch in enumerate(data_loader, 0):
-            # get the inputs; data is a list of [inputs, labels, indices]
-            inputs, labels = batch
-            
-            # zero the parameter gradients
-            optimizer.zero_grad()
+# Comments
+print("Extracting TXT from comments!")
+print(X_comment.shape)
+embedder = SentenceTransformer('all-MiniLM-L6-v2')
+current_sample = 0
+batch_embeddings = []
+print("EXTRACION!")
+while current_sample < X_comment.shape[0]:
+    print("Batch %i:%i" % (current_sample, current_sample+batch_size))
+    X_comment_batch = X_comment[current_sample:current_sample+batch_size]
+    embeddings = embedder.encode(X_comment_batch)
+    batch_embeddings.append(embeddings)
+    current_sample += X_comment_batch.shape[0]
+    # print("CURRENT SAMPLE: %i" % current_sample)
 
-            # forward + backward + optimize
-            outputs = model(inputs.to(device))
-            loss = criterion(outputs.to(device), labels.to(device))
-            epoch_loss += loss.cpu().detach().numpy()
-            loss.backward()
-            optimizer.step()
-            
-        all_loss[epoch] = epoch_loss / (i+1)
-        fig, ax = plt.subplots(1, 1, figsize = (20, 10))
-        ax.plot([i for i in range(1, num_epochs+1)][:epoch+1], all_loss[:epoch+1], c = "dodgerblue")
-        ax.set_xlim(1, num_epochs)
-        plt.tight_layout()
-        plt.savefig("figures/training/%s.png" % dataset_name)
-        plt.close()
-    
-    # Extract
-    X_img_extract = from_numpy(np.moveaxis(X_img_extract, 3, 1)).float()
-    model.eval()
+corpus_embeddings = np.concatenate(batch_embeddings, axis=0)
+print("TXT from comments extracted!")
+print(corpus_embeddings.shape)
+np.save("data_extracted/fakeddit/fakeddit_comments", corpus_embeddings)
+
+print("y from comments extracted!")
+print(y_comment.shape)
+np.save("data_extracted/fakeddit/fakeddit_comments_y", y_comment)
+
+
+"""
+Extraction from images
+"""
+
+weights = ResNet18_Weights.IMAGENET1K_V1
+model = resnet18(weights=weights)
+
+device = torch.device("mps")
+model = model.to(device)
+model.eval()
+# Extract
+for idx in range(4):
+    img_npz = np.load(f'data_npy/fakeddit/fakeddit_img_{idx}.npz')
+
+    X = from_numpy(np.moveaxis(img_npz['X'], 3, 1)).float()
+    y = img_npz['y']
 
     all_extracted = []
     current_sample = 0
     batch_size = 500
     print("EXTRACION!")
-    while current_sample < X_img_extract.shape[0]:
+    while current_sample < X.shape[0]:
         print("Batch %i:%i" % (current_sample, current_sample+batch_size))
-        X_img_extract_batch = X_img_extract[current_sample:current_sample+batch_size]
+        X_img_extract_batch = X[current_sample:current_sample+batch_size]
         return_nodes = {
             'flatten': 'extracted_flatten',
         }
@@ -149,31 +114,8 @@ for dataset_id, dataset in tqdm(enumerate(datasets)):
         current_sample += X_img_extract_batch.shape[0]
         
     all_extracted = np.vstack(tuple(all_extracted))
-    print("IMG from %s extracted!" % dataset_name)
+    print("IMG extracted!")
     print(all_extracted.shape)
-    np.save("data_extracted/mmIMDb/mmIMDb_%s_img_weighted_30" % dataset_name, all_extracted)
+    np.save(f'data_extracted/fakeddit/img_{idx}', all_extracted)
 
-    """
-    Text to embeddings
-    """
-    print("Extracting TXT from %s!" % dataset_name)
-    print(X_txt_extract.shape)
-    embedder = SentenceTransformer('all-MiniLM-L6-v2')
-    current_sample = 0
-    batch_embeddings = []
-    while current_sample < X_txt_extract.shape[0]:
-        X_txt_extract_batch = X_txt_extract[current_sample:current_sample+batch_size]
-        embeddings = embedder.encode(X_txt_extract_batch)
-        batch_embeddings.append(embeddings)
-        current_sample += X_txt_extract_batch.shape[0]
-        # print("CURRENT SAMPLE: %i" % current_sample)
-
-    corpus_embeddings = np.concatenate(batch_embeddings, axis=0)
-    print("TXT from %s extracted!" % dataset_name)
-    print(corpus_embeddings.shape)
-    np.save("data_extracted/mmIMDb/mmIMDb_%s_txt" % dataset_name, corpus_embeddings)
-    
-    print("y from %s extracted!" % dataset_name)
-    print(y_extract.shape)
-    np.save("data_extracted/mmIMDb/mmIMDb_%s_y" % dataset_name, y_extract)
     
