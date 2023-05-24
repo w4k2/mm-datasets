@@ -6,6 +6,10 @@ Do zrobienia
 import numpy as np
 from tabulate import tabulate
 import matplotlib.pyplot as plt
+# plt.rcParams.update({'font.size': 16})
+plt.rc('xtick', labelsize=22)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=22)    # fontsize of the tick labels
+plt.rc('legend', fontsize=22)    # fontsize of the tick labels
 
 all_genres = np.load("data_npy/mmIMDb_genres.npy")
 all_genres = all_genres[:, 0]
@@ -16,31 +20,32 @@ y = np.load("data_npy/mmIMDb/mmIMDb_y.npy")
 
 print("Whole dataset:")
 print(tabulate(np.array([all_genres, np.sum(y, axis=0)])))
-
 # Select
 datasets = [
-    # Binary
-    # HR
-    # ["Horror", "Romance"],
-    # DS
-    ["Documentary", "Sci-Fi"],
-    # HM
-    ["History", "Music"],
-    # BW
-    ["Biography", "Western"],
-    # AM
-    ["Animation", "Musical"],
-    # FS
-    ["Film-Noir", "Short"],
-    # FW
-    ["Family", "War"],
-    # MS
-    ["Musical", "Sport"],
-    # FM
-    ["Fantasy", "Mystery"],
-    # AT
-    ["Adventure", "Thriller"],
-    # Multiclass
+    # NeurIPS DLC
+    # ["Adventure", "Biography", "Fantasy", "Family", "History", "Horror", "Music", "Mystery", "Sci-Fi", "War"],
+    # # Binary
+    # # HR
+    ["Horror", "Romance"],
+    # # DS
+    # ["Documentary", "Sci-Fi"],
+    # # HM
+    # ["History", "Music"],
+    # # BW
+    # ["Biography", "Western"],
+    # # AM
+    # ["Animation", "Musical"],
+    # # FS
+    # ["Film-Noir", "Short"],
+    # # FW
+    # ["Family", "War"],
+    # # MS
+    # ["Musical", "Sport"],
+    # # FM
+    # ["Fantasy", "Mystery"],
+    # # AT
+    # ["Adventure", "Thriller"],
+    # # Multiclass
     # ["Crime", "Documentary", "Fantasy", "Sci-Fi"],
     # ["Animation", "Biography", "History", "Music", "War"],
     # ["Film-Noir", "Musical", "News", "Short", "Sport", "Western"],
@@ -83,18 +88,22 @@ for dataset_id, dataset in enumerate(datasets):
     np.save("data_npy/mmIMDb/mmIMDb_%s_y" % dataset_name, np.array(label_encoded_dataset_y))
     
     # Stacked bar plot
-    fig, ax = plt.subplots(1, 1, figsize=(25, 10))
+    fig, ax = plt.subplots(1, 1, figsize=(20, 10))
     previous_scores = 0
     for genre_id, one_genre in enumerate(dataset):
         one_genre_idxs = np.argwhere(dataset_y[:, genres_columns[genre_id]] == 1).flatten()
         if genre_id == 0:
-            ax.bar(all_genres, np.sum(dataset_y[one_genre_idxs], axis=0), 0.35, label=one_genre)
+            ax.bar(all_genres, np.sum(dataset_y[one_genre_idxs], axis=0), 0.45, label=one_genre)
         else:
-            ax.bar(all_genres, np.sum(dataset_y[one_genre_idxs], axis=0), 0.35, label=one_genre, bottom=previous_scores)
+            ax.bar(all_genres, np.sum(dataset_y[one_genre_idxs], axis=0), 0.45, label=one_genre, bottom=previous_scores)
         previous_scores += np.sum(dataset_y[one_genre_idxs], axis=0)
     ax.set_ylim(0, round(np.max(np.sum(dataset_y, axis=0)), -3)+500)
-    ax.set_ylabel("# Films")
+    # ax.set_title("%s | total instances: %i" % (dataset_name, dataset_X_img.shape[0]))
+    ax.spines[['right', 'top']].set_visible(False)
+    for tick in ax.get_xticklabels():
+        tick.set_rotation(70)
     plt.grid(ls=":", c=(.7, .7, .7))
     plt.legend(frameon=False)
     plt.tight_layout()
     plt.savefig("figures/mmIMDb_%s.png" % dataset_name, dpi=200)
+    plt.savefig("figures/mmIMDb_%s.eps" % dataset_name, dpi=200)

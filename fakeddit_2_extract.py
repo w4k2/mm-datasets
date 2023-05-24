@@ -25,58 +25,58 @@ X_comment = np.load('data_npy/fakeddit/fakeddit_comments.npy', allow_pickle=True
 y_comment = np.load('data_npy/fakeddit/fakeddit_comments_y.npy', allow_pickle=True).astype(int)
 
 
-"""
-Text to embeddings
-"""
+# """
+# Text to embeddings
+# """
 
-# Posts
-print("Extracting TXT from posts!")
-print(X_post.shape)
-embedder = SentenceTransformer('all-MiniLM-L6-v2')
-current_sample = 0
-batch_embeddings = []
-print("EXTRACION!")
-while current_sample < X_post.shape[0]:
-    print("Batch %i:%i" % (current_sample, current_sample+batch_size))
-    X_post_batch = X_post[current_sample:current_sample+batch_size]
-    embeddings = embedder.encode(X_post_batch)
-    batch_embeddings.append(embeddings)
-    current_sample += X_post_batch.shape[0]
-    # print("CURRENT SAMPLE: %i" % current_sample)
+# # Posts
+# print("Extracting TXT from posts!")
+# print(X_post.shape)
+# embedder = SentenceTransformer('all-MiniLM-L6-v2')
+# current_sample = 0
+# batch_embeddings = []
+# print("EXTRACION!")
+# while current_sample < X_post.shape[0]:
+#     print("Batch %i:%i" % (current_sample, current_sample+batch_size))
+#     X_post_batch = X_post[current_sample:current_sample+batch_size]
+#     embeddings = embedder.encode(X_post_batch)
+#     batch_embeddings.append(embeddings)
+#     current_sample += X_post_batch.shape[0]
+#     # print("CURRENT SAMPLE: %i" % current_sample)
 
-corpus_embeddings = np.concatenate(batch_embeddings, axis=0)
-print("TXT from posts extracted!")
-print(corpus_embeddings.shape)
-np.save("data_extracted/fakeddit/fakeddit_posts", corpus_embeddings)
+# corpus_embeddings = np.concatenate(batch_embeddings, axis=0)
+# print("TXT from posts extracted!")
+# print(corpus_embeddings.shape)
+# np.save("data_extracted/fakeddit/fakeddit_posts", corpus_embeddings)
 
-print("y from posts extracted!")
-print(y_post.shape)
-np.save("data_extracted/fakeddit/fakeddit_posts_y", y_post)
+# print("y from posts extracted!")
+# print(y_post.shape)
+# np.save("data_extracted/fakeddit/fakeddit_posts_y", y_post)
 
 
-# Comments
-print("Extracting TXT from comments!")
-print(X_comment.shape)
-embedder = SentenceTransformer('all-MiniLM-L6-v2')
-current_sample = 0
-batch_embeddings = []
-print("EXTRACION!")
-while current_sample < X_comment.shape[0]:
-    print("Batch %i:%i" % (current_sample, current_sample+batch_size))
-    X_comment_batch = X_comment[current_sample:current_sample+batch_size]
-    embeddings = embedder.encode(X_comment_batch)
-    batch_embeddings.append(embeddings)
-    current_sample += X_comment_batch.shape[0]
-    # print("CURRENT SAMPLE: %i" % current_sample)
+# # Comments
+# print("Extracting TXT from comments!")
+# print(X_comment.shape)
+# embedder = SentenceTransformer('all-MiniLM-L6-v2')
+# current_sample = 0
+# batch_embeddings = []
+# print("EXTRACION!")
+# while current_sample < X_comment.shape[0]:
+#     print("Batch %i:%i" % (current_sample, current_sample+batch_size))
+#     X_comment_batch = X_comment[current_sample:current_sample+batch_size]
+#     embeddings = embedder.encode(X_comment_batch)
+#     batch_embeddings.append(embeddings)
+#     current_sample += X_comment_batch.shape[0]
+#     # print("CURRENT SAMPLE: %i" % current_sample)
 
-corpus_embeddings = np.concatenate(batch_embeddings, axis=0)
-print("TXT from comments extracted!")
-print(corpus_embeddings.shape)
-np.save("data_extracted/fakeddit/fakeddit_comments", corpus_embeddings)
+# corpus_embeddings = np.concatenate(batch_embeddings, axis=0)
+# print("TXT from comments extracted!")
+# print(corpus_embeddings.shape)
+# np.save("data_extracted/fakeddit/fakeddit_comments", corpus_embeddings)
 
-print("y from comments extracted!")
-print(y_comment.shape)
-np.save("data_extracted/fakeddit/fakeddit_comments_y", y_comment)
+# print("y from comments extracted!")
+# print(y_comment.shape)
+# np.save("data_extracted/fakeddit/fakeddit_comments_y", y_comment)
 
 
 """
@@ -90,8 +90,8 @@ device = torch.device("mps")
 model = model.to(device)
 model.eval()
 # Extract
-for idx in range(4):
-    img_npz = np.load(f'data_npy/fakeddit/fakeddit_img_{idx}.npz')
+for idx in range(5):
+    img_npz = np.load(f'data_npy/fakeddit/fakeddit_img_{idx}.npz', allow_pickle=True)
 
     X = from_numpy(np.moveaxis(img_npz['X'], 3, 1)).float()
     y = img_npz['y']
@@ -116,6 +116,6 @@ for idx in range(4):
     all_extracted = np.vstack(tuple(all_extracted))
     print("IMG extracted!")
     print(all_extracted.shape)
-    np.save(f'data_extracted/fakeddit/img_{idx}', all_extracted)
+    np.savez_compressed(f'data_extracted/fakeddit/img_{idx}', X=all_extracted, y=y)
 
     

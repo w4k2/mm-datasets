@@ -10,3 +10,4 @@ data_npy/mmIMDb/*.npy
 data_npy/fakeddit/*.npy
 data_npy/fakeddit/*.npz
 data_csv/fakeddit/*.csv
+data_extracted/fakeddit/*.npz
